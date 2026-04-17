@@ -24,7 +24,7 @@ class CSP:
             if step % step_interval == 0 or step == len(self.viz) - 1:
                 print(f"\nStep {step + 1}:")
                 self.print_sudoku(state)
-                time.sleep(0.2)
+                time.sleep(0.1) # sped up slightly for multiple tests
 
     def solve(self): 
         assignment = {}
@@ -85,7 +85,7 @@ def is_valid_input(puzzle):
     if len(puzzle) != 9 or any(len(row) != 9 for row in puzzle): return False
     for r in range(9):
         for c in range(9):
-            if not (0 <= puzzle[r][c] <= 9): return False
+            if type(puzzle[r][c]) != int or not (0 <= puzzle[r][c] <= 9): return False
     return True
 
 def setup_csp(puzzle):
@@ -116,8 +116,11 @@ def setup_csp(puzzle):
             
     return variables, domains, constraints
 
-# test cases
-test_puzzle = [
+
+# --- TEST CASES ---
+
+# 1. Standard Case
+standard_puzzle = [
     [5, 3, 0, 0, 7, 0, 0, 0, 0], 
     [0, 0, 0, 1, 0, 5, 0, 0, 0], 
     [0, 9, 8, 0, 0, 0, 0, 6, 0], 
@@ -129,26 +132,83 @@ test_puzzle = [
     [0, 0, 0, 0, 0, 0, 4, 0, 0] 
 ]
 
-if not is_valid_input(test_puzzle):
-    print("Error: Invalid puzzle")
-else:
-    variables, domains, constraints = setup_csp(test_puzzle)
+# 2. Hard Case (sparse clues, tests efficiency of MRV + Forward Checking)
+hard_puzzle = [
+    [0, 0, 0, 6, 0, 0, 4, 0, 0],
+    [7, 0, 0, 0, 0, 3, 6, 0, 0],
+    [0, 0, 0, 0, 9, 1, 0, 8, 0],
+    [0, 0, 0, 0, 0, 0, 0, 0, 0],
+    [0, 5, 0, 1, 8, 0, 0, 0, 3],
+    [0, 0, 0, 3, 0, 6, 0, 4, 5],
+    [0, 4, 0, 2, 0, 0, 0, 6, 0],
+    [9, 0, 3, 0, 0, 0, 0, 0, 0],
+    [0, 2, 0, 0, 0, 0, 1, 0, 0]
+]
 
-    print('*** Initial Board ***') 
-    csp = CSP(variables, domains, constraints) 
-    csp.print_sudoku(test_puzzle)
+# 3. Corner Case: Unsolvable (two 5s in the first row)
+unsolvable_puzzle = [
+    [5, 5, 0, 0, 7, 0, 0, 0, 0], 
+    [0, 0, 0, 1, 0, 5, 0, 0, 0], 
+    [0, 9, 8, 0, 0, 0, 0, 6, 0], 
+    [0, 0, 0, 0, 0, 3, 0, 0, 1], 
+    [0, 0, 0, 0, 0, 0, 0, 0, 6], 
+    [0, 0, 0, 0, 0, 0, 2, 8, 0], 
+    [0, 0, 0, 0, 0, 0, 0, 0, 8], 
+    [0, 0, 0, 0, 0, 0, 0, 1, 0], 
+    [0, 0, 0, 0, 0, 0, 4, 0, 0] 
+]
 
-    sol = csp.solve() 
+# 4. Corner Case: Invalid Input (contains a string and a number > 9)
+invalid_puzzle = [
+    [5, "X", 0, 0, 7, 0, 0, 0, 0], 
+    [0, 0, 0, 1, 0, 15, 0, 0, 0], 
+    [0, 9, 8, 0, 0, 0, 0, 6, 0], 
+    [0, 0, 0, 0, 0, 3, 0, 0, 1], 
+    [0, 0, 0, 0, 0, 0, 0, 0, 6], 
+    [0, 0, 0, 0, 0, 0, 2, 8, 0], 
+    [0, 0, 0, 0, 0, 0, 0, 0, 8], 
+    [0, 0, 0, 0, 0, 0, 0, 1, 0], 
+    [0, 0, 0, 0, 0, 0, 4, 0, 0] 
+]
+
+test_suite = {
+    "1. Standard Puzzle": standard_puzzle,
+    "2. Hard Puzzle (Sparse Clues)": hard_puzzle,
+    "3. Corner Case - Unsolvable (Constraint Violation)": unsolvable_puzzle,
+    "4. Corner Case - Invalid Input Format": invalid_puzzle
+}
+
+# Run all tests
+for name, puzzle in test_suite.items():
+    print(f"\n{'='*40}")
+    print(f"Running Test: {name}")
+    print(f"{'='*40}")
+
+    if not is_valid_input(puzzle):
+        print(">> ERROR: Invalid puzzle dimensions or values detected.")
+        continue
+
+    variables, domains, constraints = setup_csp(puzzle)
+    csp = CSP(variables, domains, constraints)
+    
+    print("Initial Board:")
+    csp.print_sudoku(puzzle)
+
+    start = time.time()
+    sol = csp.solve()
+    end = time.time()
 
     if sol:
-        print('\n*** Solution Found! ***') 
+        print(f"\n>> SUCCESS: Solution found in {end - start:.4f} seconds.")
         solution = [[0 for _ in range(9)] for _ in range(9)] 
         for (i, j), val in sol.items(): 
             solution[i][j] = val
-            
         csp.print_sudoku(solution)
-        csp.visualize()
+        
+        # Only visualize the standard puzzle to avoid spamming the console
+        if name == "1. Standard Puzzle":
+            csp.visualize()
     else:
-        print("\nNo solution or invalid board.")
+        print("\n>> FAILED: Solution does not exist (Domain wipeout detected).")
 
-    
+input("\nPress Enter to exit...")
