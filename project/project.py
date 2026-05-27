@@ -136,6 +136,5 @@ plt.tight_layout()
 plot_filename = 'midterm_results_plot.jpg'
 plt.savefig(plot_filename, dpi=300, bbox_inches='tight')
 
-print(f"All done! 🎉 I've saved the plot as '{plot_filename}' in your folder.")
-print("You can pop that straight into your LaTeX report now.")
+print(f"All done '{plot_filename}' in your folder.")
 plt.show()
