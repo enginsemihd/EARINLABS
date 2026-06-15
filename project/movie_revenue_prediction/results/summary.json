@@ -1,0 +1,19 @@
+{
+  "n_samples": 2943,
+  "n_features": 49,
+  "best_model": "CatBoost",
+  "best_model_metrics": {
+    "Model": "CatBoost",
+    "fit_seconds": 2.369793176651001,
+    "RMSE": 82267596.37042856,
+    "MAE": 37787402.03579488,
+    "R2": 0.6695892421552616,
+    "RMSLE": 1.5392989079087775,
+    "MAPE": 5.613088214183337,
+    "MedAPE": 0.6543684981933884,
+    "cv_rmsle_mean": 1.5835782173738275,
+    "cv_rmsle_std": 0.0285625931385122
+  },
+  "ablation_baseline_rmsle": 1.5835782173738275,
+  "random_seed": 42
+}
